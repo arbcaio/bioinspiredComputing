@@ -1,11 +1,9 @@
 import random 
 import os
 
-# Limpar a tela
 def limpar_tela():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-# Função para gerar items 
 def gerar_items(quant_items, max_peso, max_valor):
     items = [(random.randint(1, max_peso), random.randint(1, max_valor)) for _ in range(quant_items)]
     return items
@@ -77,13 +75,48 @@ def crossover(solucao1, solucao2, items, max_peso, prob_crossover=0.5): # por en
         if probabilidade < prob_crossover:
             filho1[i] = solucao2[i]
             filho2[i] = solucao1[i]
+    #aqui so checa???
     if not checar_individuo(max_peso, filho1, items) or not checar_individuo(max_peso, filho2, items):
         print(filho1, 'max_peso:', max_peso, 'peso, valor filho 1:', calcular_peso(filho1, items), calcular_valor(filho1, items))
         print(filho2, 'max_peso:', max_peso, 'peso, valor filho 2:', calcular_peso(filho2, items), calcular_valor(filho2, items))
+     #agora corrijo o peso do filho, nao apenas checo
+    filho1 = corrigir_peso(filho1, max_peso, items)
+    filho2 = corrigir_peso(filho2, max_peso, items)
+
+    
     return filho1, filho2
 
-def mutacao(individuo, taxa_mutacao): # ainda n funciona
-    for i in range(len(individuo)):
-        if random.random() < taxa_mutacao:
-            individuo[i] = 1 - individuo[i]
+
+def corrigir_peso(individuo, capacidade_mochila, items):
+    peso_total = calcular_peso(individuo, items)
+
+    while peso_total > capacidade_mochila:
+        #se o peso exceder a capacidade da mochila, remova um item aleatório
+        indice_item = random.randint(0, len(individuo) - 1)
+
+        individuo[indice_item] = 0
+
+        peso_total = calcular_peso(individuo, items)
+
     return individuo
+
+def calcular_peso(individuo, items):
+    return sum(peso_item * individuo[i] for i, peso_item in enumerate(items[0]))
+
+
+def mutacao(populacao, prob_mutacao, max_peso, items):
+    nova_populacao = []
+
+    for individuo in populacao:
+        if random.random() < prob_mutacao:
+            novo_individuo = gerar_individuo(len(individuo), max_peso, items)
+            while not checar_individuo(max_peso, novo_individuo, items):
+                #se o novo indivíduo não for factível, gera outro
+                novo_individuo = gerar_individuo(len(individuo), max_peso, items)
+        else:
+            #se não ocorrer mutação, mantém o indivíduo inalterado
+            novo_individuo = individuo.copy()
+
+        nova_populacao.append(novo_individuo)
+
+    return nova_populacao
