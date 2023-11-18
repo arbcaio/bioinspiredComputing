@@ -1,4 +1,3 @@
-import sys
 import utils
 
 # Definindo parâmetros do problema da mochila
