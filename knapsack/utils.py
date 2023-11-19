@@ -22,13 +22,14 @@ def display_items(items, items_por_vez=5, sorted_list=False, sorted_key=0):
     
     return items
 
-# Função para gerar individuos
 def gerar_individuo(quant_items, max_peso_mochila, items):
-    while True:
-        individuo = [random.choice([0, 1]) for _ in range(quant_items)]
-        if checar_individuo(max_peso_mochila, individuo, items):
-            return individuo
-
+    individuo = [random.choice([0, 1]) for _ in range(quant_items)]
+    if checar_individuo(max_peso_mochila, individuo, items):
+        return individuo
+    else:
+        individuo = corrigir_peso_aleatorio(individuo, max_peso_mochila, items)
+        return individuo
+    
 def gerar_populacao_inicial(quant_items, quant_individuos, max_peso_mochila, items):
     return [gerar_individuo(quant_items, max_peso_mochila, items) for _ in range(quant_individuos)]
 
@@ -36,13 +37,21 @@ def display_populacao(populacao, items):
     for i in range(len(populacao)):
         print(f'{i}: peso {calcula_peso(populacao[i], items)} val {calcula_valor(populacao[i], items)}')
 
+def print_populacao(str, populacao, items):
+    print(f'\n{str}:\n', end='\n')
+    for i in range(len(populacao)):
+        print(f'{i}: {populacao[i]} {calcula_peso(populacao[i], items)} {calcula_valor(populacao[i], items)}')
+    
+def print_individuo(individuo, i, items):
+    print(f'Melhor da geração {i}: {calcula_peso(individuo, items)} {calcula_valor(individuo, items)}')
+
 def calcula_valor(individuo, items):
     return sum(items[i][1] for i in range(len(individuo)) if individuo[i] == 1)
 
 def calcula_peso(individuo, items):
     return sum(items[i][0] for i in range(len(individuo)) if individuo[i] == 1)
 
-def escolher_individuos(populacao, items, sorted_key=1, porcentagem_selecionados=1):
+def escolhe_individuos(populacao, items, sorted_key=1, porcentagem_selecionados=1):
     populacao = calcular_valor_populacao(populacao, items)
     populacao = sorted(populacao, key=lambda x: x[sorted_key], reverse=True)
     indice_divisao = int(len(populacao) * porcentagem_selecionados)    
@@ -86,8 +95,8 @@ def crossover(solucao1, solucao2, items, max_peso, prob_crossover=0.5):
     #     print(filho1, 'max_peso:', max_peso, 'peso, valor filho 1:', calcula_peso(filho1, items), calcula_valor(filho1, items))
     #     print(filho2, 'max_peso:', max_peso, 'peso, valor filho 2:', calcula_peso(filho2, items), calcula_valor(filho2, items))
    
-    filho1 = corrigir_peso(filho1, max_peso, items)
-    filho2 = corrigir_peso(filho2, max_peso, items)
+    filho1 = corrigir_peso_aleatorio(filho1, max_peso, items)
+    filho2 = corrigir_peso_aleatorio(filho2, max_peso, items)
 
     return filho1, filho2
 
@@ -102,26 +111,17 @@ def crossover_populacao(populacao, items, max_peso, prob_crossover=0.5):
         solucao1 = populacao[i]
         solucao2 = populacao[i + 1]
 
-        if random.random() < prob_crossover:
-            filho1, filho2 = crossover(solucao1, solucao2, items, max_peso, prob_crossover)
-        else:
-            filho1, filho2 = solucao1.copy(), solucao2.copy()
+        filho1, filho2 = crossover(solucao1, solucao2, items, max_peso, prob_crossover)
 
         nova_populacao.append(filho1)
         nova_populacao.append(filho2)
 
     return nova_populacao
 
-def print_populacao(str, populacao, items):
-    print(f'{str}:', end='\n')
-    for i in range(len(populacao)):
-        print(f'{i}: {calcula_peso(populacao[i], items)} {calcula_valor(populacao[i], items)}')
-    
-
-def corrigir_peso_aleatorio(individuo, max_peso, items): # remove item aleatorio, enquanto peso > max_peso
+def corrigir_peso_aleatorio(individuo, max_peso_mochila, items): # remove item aleatorio, enquanto peso > max_peso
     peso_total = calcula_peso(individuo, items)
 
-    while peso_total > max_peso:
+    while peso_total > max_peso_mochila:
         indice_item = random.randint(0, len(individuo) - 1)
         individuo[indice_item] = 0
         peso_total = calcula_peso(individuo, items)

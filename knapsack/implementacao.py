@@ -9,7 +9,6 @@ quant_individuos = 2
 porcentagem_selecionados = 0.5 # a ser decidido
 taxa_mutacao = 0.25 # a ser decidido
 quant_geracoes = 100
-quant_iteracoes = 100
 
 items = utils.gerar_items(quant_items, max_peso, max_valor)
 utils.limpar_tela()
