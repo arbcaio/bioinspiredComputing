@@ -35,7 +35,7 @@ def salvar_medias(nome_csv, media_peso, media_valor, peso_melhor_individuo, valo
 
     nome_arquivo = f'{nome_csv}.csv'
 
-    df.to_csv(nome_arquivo, index=False)
+    df.to_csv(nome_arquivo, index=True)
 
     print(f'Os arrays foram salvos em {nome_arquivo}')
 
@@ -231,9 +231,9 @@ def geracoes(populacao, items, max_peso_mochila, prob_crossover, taxa_mutacao, q
     melhor = escolhe_melhor(populacao, items)
     # print(melhor)
     # melhor_individuo.append(melhor)
+    print_individuo(melhor, 0, items)
     for i in range(quant_geracoes):
         selecionados, restante = escolhe_individuos_ponderado(populacao, items, porcentagem_selecionados=porcentagem_selecionados)
-        print_individuo(melhor, i, items)
         populacao = crossover_populacao(selecionados, items, max_peso_mochila, prob_crossover=prob_crossover) + mutacao(restante, taxa_mutacao, max_peso_mochila, items)
         melhor = escolhe_melhor(populacao, items)
         valor_medio = valor_medio_populacao(populacao, items)
