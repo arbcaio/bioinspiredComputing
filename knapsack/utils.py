@@ -66,6 +66,22 @@ def escolhe_individuos(populacao, items, sorted_key=1, porcentagem_selecionados=
 
     return selecionados_novos, restante_novos
 
+def escolhe_individuos_ponderado(populacao, items, sorted_key=1, porcentagem_selecionados=1):
+    populacao = calcular_valor_populacao(populacao, items)
+    populacao = sorted(populacao, key=lambda x: x[sorted_key], reverse=True)
+    indice_divisao = int(len(populacao) * porcentagem_selecionados)    
+
+    soma_aptidao = sum(individuo[sorted_key] for individuo in populacao)
+
+    probabilidades = [individuo[sorted_key] / soma_aptidao for individuo in populacao]
+
+    selecionados = random.choices(populacao, weights=probabilidades, k=indice_divisao)
+    restante = [individuo for individuo in populacao if individuo not in selecionados]
+
+    selecionados_novos = [individuo[0] for individuo in selecionados]
+    restante_novos = [individuo[0] for individuo in restante]
+    return selecionados_novos, restante_novos
+
 def calcular_valor_populacao(populacao, items):
     nova_populacao = []
     for individuo in populacao:
@@ -82,7 +98,7 @@ def checar_individuo(max_peso, individuo, items):
     else:
         return False 
 
-def crossover(solucao1, solucao2, items, max_peso, prob_crossover=0.5): 
+def crossover(solucao1, solucao2, items, max_peso_mochila, prob_crossover=0.5): 
     filho1 = solucao1.copy()
     filho2 = solucao2.copy()
     
@@ -91,16 +107,13 @@ def crossover(solucao1, solucao2, items, max_peso, prob_crossover=0.5):
         if probabilidade < prob_crossover:
             filho1[i] = solucao2[i]
             filho2[i] = solucao1[i]
-    # if not checar_individuo(max_peso, filho1, items) or not checar_individuo(max_peso, filho2, items):
-    #     print(filho1, 'max_peso:', max_peso, 'peso, valor filho 1:', calcula_peso(filho1, items), calcula_valor(filho1, items))
-    #     print(filho2, 'max_peso:', max_peso, 'peso, valor filho 2:', calcula_peso(filho2, items), calcula_valor(filho2, items))
-   
-    filho1 = corrigir_peso_aleatorio(filho1, max_peso, items)
-    filho2 = corrigir_peso_aleatorio(filho2, max_peso, items)
+
+    filho1 = corrigir_peso_aleatorio(filho1, max_peso_mochila, items)
+    filho2 = corrigir_peso_aleatorio(filho2, max_peso_mochila, items)
 
     return filho1, filho2
 
-def crossover_populacao(populacao, items, max_peso, prob_crossover=0.5):
+def crossover_populacao(populacao, items, max_peso_mochila, prob_crossover=0.5):
     nova_populacao = []
 
     if len(populacao) % 2 == 1:
@@ -111,7 +124,7 @@ def crossover_populacao(populacao, items, max_peso, prob_crossover=0.5):
         solucao1 = populacao[i]
         solucao2 = populacao[i + 1]
 
-        filho1, filho2 = crossover(solucao1, solucao2, items, max_peso, prob_crossover)
+        filho1, filho2 = crossover(solucao1, solucao2, items, max_peso_mochila, prob_crossover)
 
         nova_populacao.append(filho1)
         nova_populacao.append(filho2)
@@ -169,6 +182,37 @@ def calcula_peso(individuo, items):
         if individuo[i] == 1:
             peso_total += items[i][0]
     return peso_total
+
+def peso_medio_populacao(populacao, items):
+    if not populacao:
+        return 0  
+    soma_pesos = sum(calcula_peso(individuo, items) for individuo in populacao)
+    media_peso = soma_pesos / len(populacao)
+    
+    return media_peso
+
+def valor_medio_populacao(populacao, items):
+    if not populacao:
+        return 0  
+    soma_valor = sum(calcula_valor(individuo, items) for individuo in populacao)
+    media_valor = soma_valor / len(populacao)
+    
+    return media_valor
+
+def iteracoes(populacao, items, max_peso_mochila, prob_crossover, taxa_mutacao, quant_geracoes=100, porcentagem_selecionados=0.2):
+    medias_peso = []
+    medias_valor = []
+
+    for i in range(quant_geracoes):
+        selecionados, restante = escolhe_individuos_ponderado(populacao, items, porcentagem_selecionados=porcentagem_selecionados)
+        print_individuo(selecionados[0], i, items)
+        populacao = crossover_populacao(selecionados, items, max_peso_mochila, prob_crossover=prob_crossover) + mutacao(restante, taxa_mutacao, max_peso_mochila, items)
+        valor_medio = valor_medio_populacao(populacao, items)
+        peso_medio = peso_medio_populacao(populacao, items)
+        medias_valor.append(valor_medio)
+        medias_peso.append(peso_medio)
+    print_individuo(selecionados[0], quant_geracoes, items)
+    return medias_valor, medias_peso
 
 def mutacao(populacao, taxa_mutacao, max_peso, items):
     nova_populacao = []
