@@ -24,7 +24,6 @@ def display_items(items, items_por_vez=5, sorted_list=False, sorted_key=0):
     return items
 
 def salvar_medias(nome_csv, media_peso, media_valor, peso_melhor_individuo, valor_melhor_individuo, melhor_individuo):
-
     df = pd.DataFrame({
         'media_peso': media_peso, 
         'media_valor': media_valor, 
@@ -32,12 +31,22 @@ def salvar_medias(nome_csv, media_peso, media_valor, peso_melhor_individuo, valo
         'valor_melhor_individuo': valor_melhor_individuo, 
         'melhor_individuo': melhor_individuo
         })
-
     nome_arquivo = f'{nome_csv}.csv'
+    df.to_csv(nome_arquivo, index=False)
+    print(f'Gerações salvas em {nome_arquivo}')
 
-    df.to_csv(nome_arquivo, index=True)
-
-    print(f'Os arrays foram salvos em {nome_arquivo}')
+def salvar_items(nome_csv, items):
+    peso = []
+    valor = []
+    peso = [i[0] for i in items]
+    valor = [i[1] for i in items]
+    df = pd.DataFrame({
+        'peso': peso,
+        'valor': valor
+        })
+    nome_arquivo = f'{nome_csv}.csv'
+    df.to_csv(nome_arquivo, index=False)
+    print(f'Items salvos em {nome_arquivo}')
 
 def gerar_individuo(quant_items, max_peso_mochila, items):
     individuo = [random.choice([0, 1]) for _ in range(quant_items)]
@@ -156,7 +165,9 @@ def crossover_populacao(populacao, items, max_peso_mochila, prob_crossover=0.5):
 
 def corrigir_peso_aleatorio(individuo, max_peso_mochila, items): # remove item aleatorio, enquanto peso > max_peso
     peso_total = calcula_peso(individuo, items)
-
+    if peso_total == 0:
+        individuo = gerar_individuo(len(items), max_peso_mochila, items)
+        return individuo
     while peso_total > max_peso_mochila:
         indice_item = random.randint(0, len(individuo) - 1)
         individuo[indice_item] = 0
@@ -241,8 +252,8 @@ def geracoes(populacao, items, max_peso_mochila, prob_crossover, taxa_mutacao, q
         media_valor.append(valor_medio)
         media_peso.append(peso_medio)
         melhor_individuo.append(melhor) 
-        peso_melhor_individuo.append(calcula_peso(melhor_individuo, items))
-        valor_melhor_individuo.append(calcula_valor(melhor_individuo, items))
+        peso_melhor_individuo.append(calcula_peso(melhor, items))
+        valor_melhor_individuo.append(calcula_valor(melhor, items))
     print_individuo(melhor, quant_geracoes, items)
     return media_valor, media_peso, peso_melhor_individuo, valor_melhor_individuo, melhor_individuo
 
@@ -253,12 +264,11 @@ def mutacao(populacao, taxa_mutacao, max_peso, items):
         if random.random() < taxa_mutacao:
             novo_individuo = gerar_individuo(len(individuo), max_peso, items)
             while not checar_individuo(max_peso, novo_individuo, items):
-                # se o novo indivíduo não for factível, gera outro
                 novo_individuo = gerar_individuo(len(individuo), max_peso, items)
         else:
-            # se não ocorrer mutação, mantém o indivíduo inalterado
             novo_individuo = individuo.copy()
 
         nova_populacao.append(novo_individuo)
 
     return nova_populacao
+
