@@ -53,7 +53,7 @@ def gerar_individuo(quant_items, max_peso_mochila, items):
     if checar_individuo(max_peso_mochila, individuo, items):
         return individuo
     else:
-        individuo = corrigir_peso_aleatorio(individuo, max_peso_mochila, items)
+        individuo = corrigir_peso(individuo, max_peso_mochila, items)
         return individuo
     
 def gerar_populacao_inicial(quant_items, quant_individuos, max_peso_mochila, items):
@@ -99,6 +99,7 @@ def escolhe_individuos(populacao, items, sorted_key=1, porcentagem_selecionados=
     return selecionados_novos, restante_novos
 
 def escolhe_individuos_ponderado(populacao, items, sorted_key=1, porcentagem_selecionados=1):
+    # print('pop ', len(populacao), end=' ')
     populacao = calcular_valor_populacao(populacao, items)
     populacao = sorted(populacao, key=lambda x: x[sorted_key], reverse=True)
     indice_divisao = int(len(populacao) * porcentagem_selecionados)    
@@ -108,10 +109,12 @@ def escolhe_individuos_ponderado(populacao, items, sorted_key=1, porcentagem_sel
     probabilidades = [individuo[sorted_key] / soma_aptidao for individuo in populacao]
 
     selecionados = random.choices(populacao, weights=probabilidades, k=indice_divisao)
-    restante = [individuo for individuo in populacao if individuo not in selecionados]
+    restante = populacao[len(selecionados):]
 
     selecionados_novos = [individuo[0] for individuo in selecionados]
     restante_novos = [individuo[0] for individuo in restante]
+    # print(len(selecionados + restante)) 
+
     return selecionados_novos, restante_novos
 
 def calcular_valor_populacao(populacao, items):
@@ -233,19 +236,28 @@ def valor_medio_populacao(populacao, items):
     
     return media_valor
 
-def geracoes(populacao, items, max_peso_mochila, prob_crossover, taxa_mutacao, quant_geracoes=100, porcentagem_selecionados=0.2):
+def geracoes(quant_items, quant_individuos, items, max_peso_mochila, prob_crossover, taxa_mutacao, quant_geracoes=100, porcentagem_selecionados=0.2):
     media_peso = []
     media_valor = []
     peso_melhor_individuo = []
     valor_melhor_individuo = []
     melhor_individuo = []
+    populacao = gerar_populacao_inicial(quant_items, quant_individuos, max_peso_mochila, items)
+    populacao.extend(gerar_populacao_inicial(quant_items, quant_individuos, max_peso_mochila, items))
     melhor = escolhe_melhor(populacao, items)
-    # print(melhor)
-    # melhor_individuo.append(melhor)
     print_individuo(melhor, 0, items)
     for i in range(quant_geracoes):
-        selecionados, restante = escolhe_individuos_ponderado(populacao, items, porcentagem_selecionados=porcentagem_selecionados)
-        populacao = crossover_populacao(selecionados, items, max_peso_mochila, prob_crossover=prob_crossover) + mutacao(restante, taxa_mutacao, max_peso_mochila, items)
+        # seleciona metade para sobreviver
+        sobrevivem, _ = escolhe_individuos_ponderado(populacao, items, porcentagem_selecionados=0.5)
+        # print('sobrevivem: ', len(sobrevivem))
+        # seleciona porcentagem_selecionados para crossover
+        selecionados, restante = escolhe_individuos_ponderado(sobrevivem, items, porcentagem_selecionados=porcentagem_selecionados)
+        # print('selecionados: ', len(selecionados))
+        # print('restante: ', len(restante))
+        
+        populacao = crossover_populacao(selecionados, items, max_peso_mochila, prob_crossover=prob_crossover) + mutacao(restante, taxa_mutacao, max_peso_mochila, items) + sobrevivem
+
+        # print('populacao: ', len(populacao))
         melhor = escolhe_melhor(populacao, items)
         valor_medio = valor_medio_populacao(populacao, items)
         peso_medio = peso_medio_populacao(populacao, items)
