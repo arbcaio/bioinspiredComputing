@@ -27,11 +27,10 @@ The repository is organized as follows:
 
 The implementations use Python and require the following libraries:
 
-
 - `random`: Python built-in library for generating random numbers.
 - `os`: Python built-in library for interacting with the operating system.
-- `pandas`:
-- `matplotlib.pyplot`: 
+- `pandas`: A library providing high-performance, easy-to-use data structures and data analysis tools for Python.
+- `matplotlib.pyplot`: A plotting module in Python's matplotlib library for creating static, interactive, and animated visualizations. 
 
 ## Contributions
 

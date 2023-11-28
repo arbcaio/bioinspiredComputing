@@ -143,8 +143,8 @@ def crossover(solucao1, solucao2, items, max_peso_mochila, prob_crossover=0.5):
             filho1[i] = solucao2[i]
             filho2[i] = solucao1[i]
 
-    filho1 = corrigir_peso_aleatorio(filho1, max_peso_mochila, items)
-    filho2 = corrigir_peso_aleatorio(filho2, max_peso_mochila, items)
+    filho2 = corrigir_peso(filho2, max_peso_mochila, items)
+    filho1 = corrigir_peso(filho1, max_peso_mochila, items)
 
     return filho1, filho2
 
@@ -245,7 +245,7 @@ def geracoes(quant_items, quant_individuos, items, max_peso_mochila, prob_crosso
     populacao = gerar_populacao_inicial(quant_items, quant_individuos, max_peso_mochila, items)
     populacao.extend(gerar_populacao_inicial(quant_items, quant_individuos, max_peso_mochila, items))
     melhor = escolhe_melhor(populacao, items)
-    print_individuo(melhor, 0, items)
+    # print_individuo(melhor, 0, items)
     for _ in range(quant_geracoes):
         sobrevivem, _ = escolhe_individuos(populacao, items, porcentagem_selecionados=0.5)
         selecionados, restante = escolhe_individuos(sobrevivem, items, porcentagem_selecionados=porcentagem_selecionados)
@@ -258,7 +258,7 @@ def geracoes(quant_items, quant_individuos, items, max_peso_mochila, prob_crosso
         melhor_individuo.append(melhor) 
         peso_melhor_individuo.append(calcula_peso(melhor, items))
         valor_melhor_individuo.append(calcula_valor(melhor, items))
-    print_individuo(melhor, quant_geracoes, items)
+    # print_individuo(melhor, quant_geracoes, items)
     return media_valor, media_peso, peso_melhor_individuo, valor_melhor_individuo, melhor_individuo
 
 def mutacao(populacao, taxa_mutacao, max_peso, items):
