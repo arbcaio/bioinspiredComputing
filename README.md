@@ -19,11 +19,9 @@ The repository is organized as follows:
 - **`knapsack_problem/`**: Implementation of Genetic Algorithm for solving the Knapsack Problem.
   - `implementacaoKnapsack.py`: Python script containing the genetic algorithm for the Knapsack Problem.
 
-- **`cutting_stock_problem/`**: Implementation of Genetic Algorithm for solving the Cutting Stock Problem.
-  - `implementacaoCuttingStock.py`: Python script containing the genetic algorithm for the Cutting Stock Problem.
-
-  - `genetic_algorithm.py`: General implementation of a genetic algorithm.
   - `utils.py`: Utility functions used by both problem implementations.
+
+  - `analiseKnapsack.ipynb`: Python script containing the genetic algorithm for the Knapsack Problem.
 
 ## Dependencies
 
@@ -32,6 +30,8 @@ The implementations use Python and require the following libraries:
 
 - `random`: Python built-in library for generating random numbers.
 - `os`: Python built-in library for interacting with the operating system.
+- `pandas`:
+- `matplotlib.pyplot`: 
 
 ## Contributions
 

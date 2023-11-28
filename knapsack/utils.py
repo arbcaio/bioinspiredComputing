@@ -246,18 +246,10 @@ def geracoes(quant_items, quant_individuos, items, max_peso_mochila, prob_crosso
     populacao.extend(gerar_populacao_inicial(quant_items, quant_individuos, max_peso_mochila, items))
     melhor = escolhe_melhor(populacao, items)
     print_individuo(melhor, 0, items)
-    for i in range(quant_geracoes):
-        # seleciona metade para sobreviver
-        sobrevivem, _ = escolhe_individuos_ponderado(populacao, items, porcentagem_selecionados=0.5)
-        # print('sobrevivem: ', len(sobrevivem))
-        # seleciona porcentagem_selecionados para crossover
-        selecionados, restante = escolhe_individuos_ponderado(sobrevivem, items, porcentagem_selecionados=porcentagem_selecionados)
-        # print('selecionados: ', len(selecionados))
-        # print('restante: ', len(restante))
-        
+    for _ in range(quant_geracoes):
+        sobrevivem, _ = escolhe_individuos(populacao, items, porcentagem_selecionados=0.5)
+        selecionados, restante = escolhe_individuos(sobrevivem, items, porcentagem_selecionados=porcentagem_selecionados)
         populacao = crossover_populacao(selecionados, items, max_peso_mochila, prob_crossover=prob_crossover) + mutacao(restante, taxa_mutacao, max_peso_mochila, items) + sobrevivem
-
-        # print('populacao: ', len(populacao))
         melhor = escolhe_melhor(populacao, items)
         valor_medio = valor_medio_populacao(populacao, items)
         peso_medio = peso_medio_populacao(populacao, items)
